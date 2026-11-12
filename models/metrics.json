@@ -1,0 +1,38 @@
+{
+    "decision_tree": {
+        "name": "Decision Tree",
+        "accuracy": 0.7597,
+        "f1_score": 0.6783,
+        "roc_auc": 0.7622
+    },
+    "ann": {
+        "name": "Neural Network (MLP)",
+        "accuracy": 0.7403,
+        "f1_score": 0.6154,
+        "roc_auc": 0.822
+    },
+    "naive_bayes": {
+        "name": "Naive Bayes",
+        "accuracy": 0.7013,
+        "f1_score": 0.5965,
+        "roc_auc": 0.7646
+    },
+    "knn": {
+        "name": "K-Nearest Neighbors",
+        "accuracy": 0.7273,
+        "f1_score": 0.5882,
+        "roc_auc": 0.79
+    },
+    "logistic_regression": {
+        "name": "Logistic Regression",
+        "accuracy": 0.7078,
+        "f1_score": 0.5455,
+        "roc_auc": 0.813
+    },
+    "svm": {
+        "name": "Support Vector Machine",
+        "accuracy": 0.7403,
+        "f1_score": 0.6,
+        "roc_auc": 0.7964
+    }
+}

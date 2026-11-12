@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diabetes Risk Assessment | Multi-Model ML Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen antialiased">
+  <!-- Top Navigation Bar -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <div class="flex items-center gap-2.5">
+          <span class="inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
+          <h1 class="text-lg sm:text-xl font-bold tracking-tight text-white">
+            Multi-Model Diabetes Risk Analyzer
+          </h1>
+        </div>
+        <p class="text-xs sm:text-sm text-slate-400 mt-0.5">
+          Comparative inference across 6 Scikit-Learn classification pipelines (Pima Indians Clinical Dataset)
+        </p>
+      </div>
+
+      <!-- Quick-Fill Demo Presets -->
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-xs font-medium text-slate-400 mr-1">Demo Presets:</span>
+        <button type="button" data-preset="low"
+          class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/20 transition">
+          Healthy Profile
+        </button>
+        <button type="button" data-preset="moderate"
+          class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg bg-amber-500/10 text-amber-300 border border-amber-500/30 hover:bg-amber-500/20 transition">
+          Borderline
+        </button>
+        <button type="button" data-preset="high"
+          class="preset-btn px-3 py-1.5 text-xs font-medium rounded-lg bg-rose-500/10 text-rose-300 border border-rose-500/30 hover:bg-rose-500/20 transition">
+          High-Risk Profile
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Grid -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Error Alert Banner -->
+    <div id="error-banner" class="hidden mb-6 rounded-xl border border-rose-500/40 bg-rose-950/50 p-4 text-sm text-rose-200">
+      <p class="font-semibold text-rose-300 mb-1">Input Validation Error</p>
+      <ul id="error-list" class="list-disc list-inside space-y-0.5 text-xs"></ul>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <!-- Left Column: Patient Clinical Input Form -->
+      <section class="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-base font-semibold text-white">Patient Clinical Biomarkers</h2>
+          <span class="text-xs text-slate-400">8 Features</span>
+        </div>
+
+        <form id="prediction-form" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Glucose -->
+            <div>
+              <label for="glucose" class="block text-xs font-medium text-slate-300 mb-1">
+                Plasma Glucose <span class="text-slate-500">(mg/dL)</span>
+              </label>
+              <input type="number" step="any" id="glucose" name="glucose" required
+                class="w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-sm font-mono text-white focus:border-indigo-500 focus:outline-none" />
+              <p class="text-[11px] text-slate-500 mt-1">Normal fasting: 70–99</p>
+            </div>
+
+            <!-- BMI -->
+            <div>
+              <label for="bmi" class="block text-xs font-medium text-slate-300 mb-1">
+                BMI <span class="text-slate-500">(kg/m²)</span>
+              </label>
+              <input type="number" step="any" id="bmi" name="bmi" required
+                class="w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-sm font-mono text-white focus:border-indigo-500 focus:outline-none" />
+              <p class="text-[11px] text-slate-500 mt-1">Normal range: 18.5–24.9</p>
+            </div>
+
+            <!-- Age -->
+            <div>
+              <label for="age" class="block text-xs font-medium text-slate-300 mb-1">
+                Age <span class="text-slate-500">(years)</span>
+              </label>
+              <input type="number" id="age" name="age" required
+                class="w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-sm font-mono text-white focus:border-indigo-500 focus:outline-none" />
+              <p class="text-[11px] text-slate-500 mt-1">Valid: 1–120 yrs</p>
+            </div>
+
+            <!-- Pregnancies -->
+            <div>
+              <label for="pregnancies" class="block text-xs font-medium text-slate-300 mb-1">
+                Pregnancies <span class="text-slate-500">(count)</span>
+              </label>
+              <input type="number" id="pregnancies" name="pregnancies" required
+                class="w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-sm font-mono text-white focus:border-indigo-500 focus:outline-none" />
+              <p class="text-[11px] text-slate-500 mt-1">Enter 0 if none</p>
+            </div>
+
+            <!-- Blood Pressure -->
+            <div>
+              <label for="blood_pressure" class="block text-xs font-medium text-slate-300 mb-1">
+                Diastolic BP <span class="text-slate-500">(mm Hg)</span>
+              </label>
+              <input type="number" step="any" id="blood_pressure" name="blood_pressure" required
+                class="w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-sm font-mono text-white focus:border-indigo-500 focus:outline-none" />
+              <p class="text-[11px] text-slate-500 mt-1">Normal: 60–80 mm Hg</p>
+            </div>
+
+            <!-- Diabetes Pedigree Function -->
+            <div>
+              <label for="diabetes_pedigree" class="block text-xs font-medium text-slate-300 mb-1">
+                Pedigree Function
+              </label>
+              <input type="number" step="any" id="diabetes_pedigree" name="diabetes_pedigree" required
+                class="w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-sm font-mono text-white focus:border-indigo-500 focus:outline-none" />
+              <p class="text-[11px] text-slate-500 mt-1">Genetic score (0.08–2.42)</p>
+            </div>
+
+            <!-- Insulin -->
+            <div>
+              <label for="insulin" class="block text-xs font-medium text-slate-300 mb-1">
+                2-Hr Insulin <span class="text-slate-500">(μU/mL)</span>
+              </label>
+              <input type="number" step="any" id="insulin" name="insulin" required
+                class="w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-sm font-mono text-white focus:border-indigo-500 focus:outline-none" />
+              <p class="text-[11px] text-slate-500 mt-1">0 = auto median impute</p>
+            </div>
+
+            <!-- Skin Thickness -->
+            <div>
+              <label for="skin_thickness" class="block text-xs font-medium text-slate-300 mb-1">
+                Skin Thickness <span class="text-slate-500">(mm)</span>
+              </label>
+              <input type="number" step="any" id="skin_thickness" name="skin_thickness" required
+                class="w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-sm font-mono text-white focus:border-indigo-500 focus:outline-none" />
+              <p class="text-[11px] text-slate-500 mt-1">0 = auto median impute</p>
+            </div>
+          </div>
+
+          <div class="pt-2">
+            <button type="submit" id="submit-btn"
+              class="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold text-sm shadow-lg shadow-indigo-600/20 transition cursor-pointer">
+              Run Multi-Model Inference
+            </button>
+          </div>
+        </form>
+
+        <div class="mt-5 pt-4 border-t border-slate-800/80 text-[11px] text-slate-400 leading-relaxed">
+          <span class="font-semibold text-slate-300">Pipeline Note:</span> Missing clinical lab values entered as <code class="font-mono text-slate-300">0</code> are imputed via training-set medians and normalized with <code class="font-mono text-slate-300">StandardScaler</code> prior to classifier inference.
+        </div>
+      </section>
+
+      <!-- Right Column: Consensus Summary, Chart & Model Table -->
+      <section class="lg:col-span-7 space-y-6">
+        <!-- Top KPI Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+            <p class="text-xs font-medium text-slate-400">Ensemble Assessment</p>
+            <div class="mt-2 flex items-center gap-2">
+              <span id="consensus-badge"
+                class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-slate-800 text-slate-300">
+                Calculating...
+              </span>
+            </div>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+            <p class="text-xs font-medium text-slate-400">Mean Risk Probability</p>
+            <p id="avg-probability" class="mt-1.5 text-2xl font-bold font-mono text-white">--%</p>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+            <p class="text-xs font-medium text-slate-400">Classifier Consensus</p>
+            <p id="vote-tally" class="mt-1.5 text-2xl font-bold font-mono text-white">- / 6</p>
+            <p class="text-[11px] text-slate-500">Models flagging positive risk</p>
+          </div>
+        </div>
+
+        <!-- Horizontal Probability Comparison Chart -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-base font-semibold text-white">Predicted Probability by Classifier</h3>
+              <p class="text-xs text-slate-400">Sorted by validation ROC-AUC score (50% decision threshold)</p>
+            </div>
+          </div>
+          <div class="h-64 w-full">
+            <canvas id="probability-chart"></canvas>
+          </div>
+        </div>
+
+        <!-- Model Breakdown & Validation Benchmarks Table -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+          <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+            <h3 class="text-base font-semibold text-white">Classifier Breakdown & Test Benchmarks</h3>
+            <span class="text-xs text-slate-400">20% Holdout Split</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-slate-800 text-[11px] uppercase tracking-wider text-slate-400 bg-slate-950/40">
+                  <th class="py-3 px-6">Model Architecture</th>
+                  <th class="py-3 px-4">Prediction</th>
+                  <th class="py-3 px-4 text-right">Risk Prob.</th>
+                  <th class="py-3 px-4 text-right">Test Acc.</th>
+                  <th class="py-3 px-6 text-right">ROC-AUC</th>
+                </tr>
+              </thead>
+              <tbody id="models-table-body" class="divide-y divide-slate-800/70 text-sm">
+                <!-- Populated dynamically via app.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <footer class="mt-10 pt-6 border-t border-slate-900 text-center text-xs text-slate-500">
+      For educational demonstration only. Not intended for clinical diagnosis.
+    </footer>
+  </main>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
